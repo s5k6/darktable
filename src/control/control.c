@@ -368,12 +368,15 @@ void dt_control_mouse_enter()
 
 void dt_control_mouse_moved(double x, double y, double pressure, int which)
 {
+  printf(
+    "[sk] dt_control_mouse_moved(%f, %f, %f, %d)\n",
+    x, y, pressure, which
+  );
   const float tb = darktable.control->tabborder;
-  /*
   const float wd = darktable.control->width;
   const float ht = darktable.control->height;
 
-  if(x > tb && x < wd - tb && y > tb && y < ht - tb)*/
+  if(x > tb && x < wd - tb && y > tb && y < ht - tb)
     dt_view_manager_mouse_moved(darktable.view_manager, x - tb, y - tb, pressure, which);
 }
 
