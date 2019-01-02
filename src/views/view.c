@@ -612,6 +612,8 @@ void dt_view_manager_mouse_moved(dt_view_manager_t *vm, double x, double y, doub
     plugins = g_list_previous(plugins);
   }
 
+  if (!handled)
+    printf("[sk] " __FILE__ ": not handled, use %s\n", v->module_name);
   /* if not handled by any plugin let pass to view handler*/
   if(!handled && v->mouse_moved) v->mouse_moved(v, x, y, pressure, which);
 }

@@ -1311,6 +1311,10 @@ int dt_masks_events_mouse_leave(struct dt_iop_module_t *module)
 
 int dt_masks_events_mouse_moved(struct dt_iop_module_t *module, double x, double y, double pressure, int which)
 {
+  printf(
+    "[sk] " __FILE__ ": dt_masks_events_mouse_moved(%f, %f, %f, %d)\n",
+    x, y, pressure, which
+  );
   // record mouse position even if there are no masks visible
   dt_masks_form_gui_t *gui = darktable.develop->form_gui;
   dt_masks_form_t *form = darktable.develop->form_visible;
@@ -1319,11 +1323,12 @@ int dt_masks_events_mouse_moved(struct dt_iop_module_t *module, double x, double
   dt_dev_get_pointer_zoom_pos(darktable.develop, x, y, &pzx, &pzy);
   pzx += 0.5f;
   pzy += 0.5f;
-
+  printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved pzx = %f, pzy = %f\n", pzx, pzy);
   if(gui)
   {
     gui->posx = pzx * darktable.develop->preview_pipe->backbuf_width;
     gui->posy = pzy * darktable.develop->preview_pipe->backbuf_height;
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved posx = %f, posy = %f\n", gui->posx, gui->posy);
   }
 
   // do not preocess if no forms visible
@@ -1333,19 +1338,25 @@ int dt_masks_events_mouse_moved(struct dt_iop_module_t *module, double x, double
   if(darktable.develop->darkroom_skip_mouse_events) return 0;
 
   int rep = 0;
-  if(form->type & DT_MASKS_CIRCLE)
+  if(form->type & DT_MASKS_CIRCLE) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a CIRCLE\n");
     rep = dt_circle_events_mouse_moved(module, pzx, pzy, pressure, which, form, 0, gui, 0);
-  else if(form->type & DT_MASKS_PATH)
+  } else if(form->type & DT_MASKS_PATH) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a PATH\n");
     rep = dt_path_events_mouse_moved(module, pzx, pzy, pressure, which, form, 0, gui, 0);
-  else if(form->type & DT_MASKS_GROUP)
+  } else if(form->type & DT_MASKS_GROUP) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a GROUP\n");
     rep = dt_group_events_mouse_moved(module, pzx, pzy, pressure, which, form, gui);
-  else if(form->type & DT_MASKS_GRADIENT)
+  } else if(form->type & DT_MASKS_GRADIENT) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a GRADIENT\n");
     rep = dt_gradient_events_mouse_moved(module, pzx, pzy, pressure, which, form, 0, gui, 0);
-  else if(form->type & DT_MASKS_ELLIPSE)
+  } else if(form->type & DT_MASKS_ELLIPSE) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a ELLIPSE\n");
     rep = dt_ellipse_events_mouse_moved(module, pzx, pzy, pressure, which, form, 0, gui, 0);
-  else if(form->type & DT_MASKS_BRUSH)
+  } else if(form->type & DT_MASKS_BRUSH) {
+    printf("[sk] " __FILE__ ":dt_masks_events_mouse_moved it's a BRUSH\n");
     rep = dt_brush_events_mouse_moved(module, pzx, pzy, pressure, which, form, 0, gui, 0);
-
+  }
   if(gui)
   {
     int ftype = form->type;

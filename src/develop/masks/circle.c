@@ -425,13 +425,19 @@ static int dt_circle_events_mouse_moved(struct dt_iop_module_t *module, float pz
                                         int which, dt_masks_form_t *form, int parentid,
                                         dt_masks_form_gui_t *gui, int index)
 {
+  printf(
+    "[sk] " __FILE__ ": dt_circle_events_mouse_moved(%f, %f)\n",
+    pzx, pzy
+  );
   if(gui->form_dragging || gui->source_dragging)
   {
+    printf("[sk] " __FILE__ ": dt_circle_events_mouse_moved: It's this case!\n");
     dt_control_queue_redraw_center();
     return 1;
   }
   else if(!gui->creation)
   {
+    printf("[sk] " __FILE__ ": dt_circle_events_mouse_moved: not this case\n");
     dt_dev_zoom_t zoom = dt_control_get_dev_zoom();
     int closeup = dt_control_get_dev_closeup();
     float zoom_scale = dt_dev_get_zoom_scale(darktable.develop, zoom, 1<<closeup, 1);
@@ -472,10 +478,12 @@ static int dt_circle_events_mouse_moved(struct dt_iop_module_t *module, float pz
   // add a preview when creating a circle
   else if(gui->creation)
   {
+    printf("[sk] " __FILE__ ": dt_circle_events_mouse_moved: not this case\n");
     dt_control_queue_redraw_center();
     return 1;
   }
 
+  printf("[sk] " __FILE__ ": dt_circle_events_mouse_moved: not this case\n");
   return 0;
 }
 

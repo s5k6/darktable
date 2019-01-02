@@ -1947,11 +1947,15 @@ void mouse_leave(dt_view_t *self)
 
 void mouse_moved(dt_view_t *self, double x, double y, double pressure, int which)
 {
+  printf(
+    "[sk] " __FILE__ ": mouse_moved(%f, %f, %f, %d)\n",
+    x, y, pressure, which
+  );
   const int32_t tb = DT_PIXEL_APPLY_DPI(dt_conf_get_int("plugins/darkroom/ui/border_size"));
   const int32_t capwd = self->width  - 2*tb;
   const int32_t capht = self->height - 2*tb;
   dt_develop_t *dev = (dt_develop_t *)self->data;
-
+  printf("[sk] " __FILE__ ": capwd = %d, capht = %d\n", capwd, capht);
   // if we are not hovering over a thumbnail in the filmstrip -> show metadata of opened image.
   int32_t mouse_over_id = dt_control_get_mouse_over_id();
   if(mouse_over_id == -1)
@@ -1963,6 +1967,7 @@ void mouse_moved(dt_view_t *self, double x, double y, double pressure, int which
   dt_control_t *ctl = darktable.control;
   const int32_t width_i = self->width;
   const int32_t height_i = self->height;
+  printf("[sk] " __FILE__ ": %d, %d\n", width_i, height_i);
   int32_t offx = 0.0f, offy = 0.0f;
   if(width_i > capwd) offx = (capwd - width_i) * .5f;
   if(height_i > capht) offy = (capht - height_i) * .5f;

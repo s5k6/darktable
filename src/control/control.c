@@ -369,7 +369,7 @@ void dt_control_mouse_enter()
 void dt_control_mouse_moved(double x, double y, double pressure, int which)
 {
   printf(
-    "[sk] dt_control_mouse_moved(%f, %f, %f, %d)\n",
+    "\n[sk] " __FILE__ ": dt_control_mouse_moved(%f, %f, %f, %d)\n",
     x, y, pressure, which
   );
   const float tb = darktable.control->tabborder;
@@ -542,6 +542,7 @@ void dt_control_queue_redraw()
 
 void dt_control_queue_redraw_center()
 {
+  printf("[sk] SO WHERE DOES THIS LEAD US?\n");
   dt_control_signal_raise(darktable.signals, DT_SIGNAL_CONTROL_REDRAW_CENTER);
 }
 

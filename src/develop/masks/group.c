@@ -124,6 +124,7 @@ static int dt_group_events_button_released(struct dt_iop_module_t *module, float
 static int dt_group_events_mouse_moved(struct dt_iop_module_t *module, float pzx, float pzy, double pressure,
                                        int which, dt_masks_form_t *form, dt_masks_form_gui_t *gui)
 {
+  printf("[sk] " __FILE__ ":dt_group_events_mouse_moved(%f, %f)\n", pzx, pzy);
   dt_dev_zoom_t zoom = dt_control_get_dev_zoom();
   int closeup = dt_control_get_dev_closeup();
   float zoom_scale = dt_dev_get_zoom_scale(darktable.develop, zoom, 1<<closeup, 1);
@@ -188,6 +189,7 @@ static int dt_group_events_mouse_moved(struct dt_iop_module_t *module, float pzx
     near = -1;
     float xx = pzx * darktable.develop->preview_pipe->backbuf_width,
           yy = pzy * darktable.develop->preview_pipe->backbuf_height;
+
     if(sel->type & DT_MASKS_CIRCLE)
       dt_circle_get_distance(xx, yy, as, gui, pos, &inside, &inside_border, &near, &inside_source);
     else if(sel->type & DT_MASKS_PATH)
