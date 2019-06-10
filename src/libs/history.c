@@ -46,6 +46,7 @@ typedef struct dt_lib_history_t
   GtkWidget *create_button;
 //   GtkWidget *apply_button;
   GtkWidget *compress_button;
+  GtkWidget *removeUnused_checkbox;
   gboolean record_undo;
 } dt_lib_history_t;
 
@@ -53,6 +54,7 @@ typedef struct dt_lib_history_t
 static void _lib_history_compress_clicked_callback(GtkWidget *widget, gpointer user_data);
 static void _lib_history_button_clicked_callback(GtkWidget *widget, gpointer user_data);
 static void _lib_history_create_style_button_clicked_callback(GtkWidget *widget, gpointer user_data);
+static void _lib_history_removeUnused_toggled_callback(GtkWidget *widget, gpointer user_data);
 /* signal callback for history change */
 static void _lib_history_change_callback(gpointer instance, gpointer user_data);
 static void _lib_history_module_remove_callback(gpointer instance, dt_iop_module_t *module, gpointer user_data);
@@ -128,6 +130,18 @@ void gui_init(dt_lib_module_t *self)
   gtk_box_pack_start(GTK_BOX(self->widget), d->history_box, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(self->widget), hhbox, FALSE, FALSE, 0);
 
+  /* add button to remove unused modules */
+  d->removeUnused_checkbox = gtk_check_button_new_with_label(
+    _("also remove unused")
+  );
+  gtk_widget_set_tooltip_text(d->removeUnused_checkbox,
+    _("when compressing, also remove modules that have been explicitly switched off"));
+  gtk_box_pack_start(GTK_BOX(self->widget), d->removeUnused_checkbox,
+    FALSE, FALSE, 0);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(d->removeUnused_checkbox),
+    dt_conf_get_int("ui_last/history_compress_remove_unused"));
+  g_signal_connect(G_OBJECT(d->removeUnused_checkbox), "toggled",
+    G_CALLBACK(_lib_history_removeUnused_toggled_callback), NULL);
 
   gtk_widget_show_all(self->widget);
 
@@ -715,14 +729,21 @@ static void _lib_history_compress_clicked_callback(GtkWidget *widget, gpointer u
   sqlite3_step(stmt);
   sqlite3_finalize(stmt);
 
-  // remove switched-off modules
-  DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
-    "DELETE FROM main.history WHERE imgid = ?1 AND enabled == 0",
-    -1, &stmt, NULL);
-  DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
-  sqlite3_step(stmt);
-  sqlite3_finalize(stmt);
-
+  /* Remove switched-off modules.  Exceptions are modules 2
+     (orientation and highlight reconstruction) and 3 (white balance),
+     which are on by default, but *not* recorded to history.  If the
+     user switched them off intentionally, we must not remove this
+     information from history, because this information would be lost.
+  */
+  if (dt_conf_get_bool("ui_last/history_compress_remove_unused")) {
+    DT_DEBUG_SQLITE3_PREPARE_V2(dt_database_get(darktable.db),
+      "DELETE FROM main.history WHERE imgid = ?1 AND enabled == 0"
+      " AND module != 2 AND module != 3",
+      -1, &stmt, NULL);
+    DT_DEBUG_SQLITE3_BIND_INT(stmt, 1, imgid);
+    sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+  }
 
   // delete all mask_manager entries
   int masks_count = 0;
@@ -815,6 +836,13 @@ static void _lib_history_compress_clicked_callback(GtkWidget *widget, gpointer u
 
   dt_dev_reload_history_items(darktable.develop);
   dt_dev_modulegroups_set(darktable.develop, dt_dev_modulegroups_get(darktable.develop));
+}
+
+static void _lib_history_removeUnused_toggled_callback(GtkWidget *widget,
+  gpointer user_data)
+{
+  dt_conf_set_bool("ui_last/history_compress_remove_unused",
+    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)));
 }
 
 static void _lib_history_button_clicked_callback(GtkWidget *widget, gpointer user_data)
